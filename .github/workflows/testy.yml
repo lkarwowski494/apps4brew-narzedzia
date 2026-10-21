@@ -1,0 +1,19 @@
+# Testy narzędzi studia (node --test). Bez sekretów; maszyna ubuntu.
+name: Testy narzędzi
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  testy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node --test testy/asc-kontrola.test.mjs

@@ -1,0 +1,34 @@
+{
+  "_opis": "Przykładowa konfiguracja do testów narzędzia (aplikacja fikcyjna). Opis pól: asc-kontrola/README.md.",
+  "aplikacja": { "bundleId": "com.example.przyklad" },
+  "produkty": [
+    { "klucz": "monthly", "productId": "com.example.przyklad.monthly", "rodzaj": "subskrypcja" },
+    { "klucz": "yearly", "productId": "com.example.przyklad.yearly", "rodzaj": "subskrypcja" },
+    { "klucz": "lifetime", "productId": "com.example.przyklad.lifetime", "rodzaj": "jednorazowy" }
+  ],
+  "terytoria": {
+    "wybrane": ["USA", "POL", "DEU", "FRA", "ITA", "ESP", "NLD", "GBR"],
+    "grupy": {
+      "strefaEuro": ["AUT", "BEL", "BGR", "HRV", "CYP", "EST", "FIN", "FRA", "DEU", "GRC", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "PRT", "SVK", "SVN", "ESP"]
+    }
+  },
+  "ceny": {
+    "monthly": { "USA": 0.99, "POL": 4.99, "strefaEuro": 0.99, "GBR": null },
+    "yearly": { "USA": 6.99, "POL": 19.99, "strefaEuro": 7.99, "GBR": 6.99 },
+    "lifetime": { "USA": 14.99, "POL": 59.99, "strefaEuro": null, "GBR": null }
+  },
+  "oferta": { "produkty": ["monthly", "yearly"], "tryb": "FREE_TRIAL", "czas": "TWO_WEEKS", "bezDatyKonca": true },
+  "rodzina": { "monthly": true, "yearly": true, "lifetime": true },
+  "adresy": { "plik": "dane/adresy.json" },
+  "kategoria": { "glowna": "HEALTH_AND_FITNESS", "dodatkowa": null },
+  "wiek": {},
+  "dostepnosc": { "terytoria": null },
+  "metadane": {
+    "zrodla": [
+      { "plik": "dane/nazwy.json", "korzen": "names", "pola": { "name": null } },
+      { "plik": "dane/metadane.json", "korzen": "lokalizacje", "pola": { "subtitle": "subtitle", "keywords": "keywords" } }
+    ],
+    "komunikatBraku": "oczekiwane po dodaniu plików metadanych"
+  },
+  "uwagiRecenzenta": { "plik": "dane/notatki.md", "komunikatBraku": "brak pliku z notatkami" }
+}

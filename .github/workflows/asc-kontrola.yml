@@ -1,0 +1,76 @@
+# Kontrola ustawień App Store Connect — TYLKO ODCZYT (workflow wielokrotnego użytku, wspólny dla aplikacji studia).
+# Użycie w repozytorium aplikacji (przypięte do pełnego SHA):
+#   jobs:
+#     kontrola:
+#       uses: lkarwowski494/apps4brew-narzedzia/.github/workflows/asc-kontrola.yml@<SHA 40 znaków>
+#       with: { config: sciezka/do/konfiguracji.json, szczegoly: false }
+#       secrets: { ASC_KEY_ID: ..., ASC_ISSUER_ID: ..., ASC_KEY_P8: ... }
+# Workflow pobiera DWA repozytoria: wywołujące (pliki konfiguracji i oczekiwane wartości) oraz to repozytorium narzędzi w dokładnie tej wersji, którą wskazano w `uses:`
+# (`job.workflow_repository` i `job.workflow_sha` — kontekst `job` wskazuje plik workflow wielokrotnego użytku, nie wywołującego; źródło:
+# https://docs.github.com/en/actions/reference/workflows-and-actions/contexts , odczyt 21.10.2026). Narzędzie wysyła wyłącznie żądania GET do App Store Connect API.
+# Raport trafia do podsumowania przebiegu; kod wyjścia 1 = jest różnica (czerwony przebieg). Wywołujące repozytorium może być publiczne: logi bez identyfikatorów
+# klucza (maskowanie), klucz tylko w RUNNER_TEMP i usuwany zawsze.
+name: ASC kontrola (wspólna)
+on:
+  workflow_call:
+    inputs:
+      config:
+        description: 'Ścieżka do pliku konfiguracji aplikacji (względem katalogu głównego repozytorium wywołującego)'
+        type: string
+        required: true
+      szczegoly:
+        description: 'Dołącz szczegóły (listy terytoriów, odpowiedzi wiekowe, lokalizacje)'
+        type: boolean
+        default: false
+    secrets:
+      ASC_KEY_ID:
+        required: true
+      ASC_ISSUER_ID:
+        required: true
+      ASC_KEY_P8:
+        required: true
+permissions:
+  contents: read
+jobs:
+  kontrola:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Repozytorium wywołujące (konfiguracja i oczekiwane wartości)
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Repozytorium narzędzi w wersji z `uses:`
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: .narzedzia-studia
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Klucz API do pliku tymczasowego (maskowany)
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          for v in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do [ -n "${!v}" ] || { echo "::error::Brak sekretu $v"; exit 1; }; done
+          echo "::add-mask::$ASC_KEY_ID"; echo "::add-mask::$ASC_ISSUER_ID"
+          printf '%s\n' "$ASC_KEY_P8" | while IFS= read -r line; do case "$line" in -----*) ;; *) [ ${#line} -ge 20 ] && echo "::add-mask::$line" ;; esac; done; true
+          umask 077; printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+      - name: Kontrola (tylko odczyt)
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          KONFIGURACJA: ${{ inputs.config }}
+          SZCZEGOLY: ${{ inputs.szczegoly }}
+        run: |
+          set -o pipefail
+          export ASC_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          opcje=(); [ "$SZCZEGOLY" = "true" ] && opcje+=(--szczegoly)
+          node .narzedzia-studia/asc-kontrola/kontrola.mjs --config "$KONFIGURACJA" "${opcje[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Usunięcie klucza z maszyny
+        if: always()
+        run: rm -f "$RUNNER_TEMP/AuthKey.p8"
