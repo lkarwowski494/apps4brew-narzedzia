@@ -170,3 +170,22 @@ describe('workflow wielokrotnego użytku', () => {
     const ci = read('.github/workflows/testy.yml'); match(ci, /node --test testy\/asc-kontrola\.test\.mjs/); nomatch(ci, /secrets\./); match(ci, /permissions:\n\s+contents: read/);
   });
 });
+
+// Model bez oferty wprowadzającej (np. Trening M5 S1, 22.10.2026): konfiguracja `oferta: { produkty, brak: true }`.
+import { porownajOferty } from '../asc-kontrola/kontrole/oferty.mjs';
+describe('oferta.brak: oczekiwany brak ofert wprowadzających', () => {
+  const teryt = new Set(['USA', 'POL']);
+  const oferta = (t) => ({ relationships: { territory: { data: { id: t } } }, attributes: { offerMode: 'FREE_TRIAL', duration: 'TWO_WEEKS' } });
+  test('brak ofert → OK', () => {
+    const [w] = porownajOferty({ klucz: 'monthly', oferty: [], terytoriaCen: teryt, oczekiwana: { produkty: ['monthly'], brak: true } });
+    assert.equal(w.status, 'OK');
+  });
+  test('jakakolwiek oferta przy brak: true → RÓŻNICA z kodami terytoriów', () => {
+    const [w] = porownajOferty({ klucz: 'monthly', oferty: [oferta('USA')], terytoriaCen: teryt, oczekiwana: { produkty: ['monthly'], brak: true } });
+    assert.equal(w.status, 'RÓŻNICA'); assert.match(w.opis, /USA/);
+  });
+  test('bez brak: true pusta lista nadal jest RÓŻNICĄ (dotychczasowe zachowanie)', () => {
+    const [w] = porownajOferty({ klucz: 'monthly', oferty: [], terytoriaCen: teryt, oczekiwana: { produkty: ['monthly'], tryb: 'FREE_TRIAL', czas: 'TWO_WEEKS' } });
+    assert.equal(w.status, 'RÓŻNICA');
+  });
+});

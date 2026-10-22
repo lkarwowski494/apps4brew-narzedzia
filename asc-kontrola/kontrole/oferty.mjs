@@ -1,9 +1,14 @@
 // Oferty wprowadzające subskrypcji: tryb, czas, wszystkie terytoria (te, w których subskrypcja ma cenę), bez daty końca.
-// Konfiguracja: oferta { produkty[], tryb (np. FREE_TRIAL), czas (np. TWO_WEEKS), bezDatyKonca }.
+// Konfiguracja: oferta { produkty[], tryb (np. FREE_TRIAL), czas (np. TWO_WEEKS), bezDatyKonca } albo { produkty[], brak: true } — model bez oferty wprowadzającej.
 import { STATUS as S, wiersz, kody } from '../wspolne.mjs';
 
 export function porownajOferty({ klucz, oferty, terytoriaCen, oczekiwana }) {
   if (!terytoriaCen.size) return [wiersz(S.BRAK, `${klucz}: subskrypcja nie ma cen — nie da się ustalić listy terytoriów`)];
+  if (oczekiwana.brak === true) {
+    if (!oferty.length) return [wiersz(S.OK, `${klucz}: brak ofert wprowadzających (zgodnie z konfiguracją)`)];
+    const t = oferty.map(o => o.relationships?.territory?.data?.id).filter(Boolean);
+    return [wiersz(S.ROZNICA, `${klucz}: oczekiwany brak ofert wprowadzających, są w ${t.length} terytoriach: ${kody(t)} — usuń w App Store Connect (subskrypcja → Introductory Offers)`)];
+  }
   if (!oferty.length) return [wiersz(S.ROZNICA, `${klucz}: brak ofert wprowadzających`)];
   const maTeryt = new Map(oferty.map(o => [o.relationships?.territory?.data?.id, o.attributes ?? {}]));
   const zlyTryb = [...maTeryt].filter(([, a]) => a.offerMode !== oczekiwana.tryb).map(([t]) => t);

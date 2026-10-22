@@ -57,7 +57,7 @@ Jeden plik JSON. Pola (wszystkie poza `aplikacja` opcjonalne — kontrola bez wp
 | `terytoria.wybrane[]` | kody terytoriów App Store Connect (np. `USA`, `POL`) kontrolowane osobno |
 | `terytoria.grupy{}` | nazwa grupy → lista kodów (np. strefa euro); kwota grupy w `ceny` |
 | `ceny{klucz}` | `{ <terytorium albo grupa>: kwota lub null }`; wpis terytorium ma pierwszeństwo przed wpisem grupy |
-| `oferta` | `{ produkty[], tryb (np. FREE_TRIAL), czas (np. TWO_WEEKS), bezDatyKonca }` |
+| `oferta` | `{ produkty[], tryb (np. FREE_TRIAL), czas (np. TWO_WEEKS), bezDatyKonca }` albo `{ produkty[], brak: true }` (model bez oferty wprowadzającej: OK tylko, gdy produkt nie ma żadnej) |
 | `rodzina{klucz}` | oczekiwany Family Sharing (`true`/`false`) |
 | `adresy.plik` | plik JSON z `privacyPolicyUrl`, `supportUrl`, `marketingUrl` |
 | `kategoria` | `{ glowna, dodatkowa }` (identyfikatory kategorii; `null` = tylko wypisz) |
