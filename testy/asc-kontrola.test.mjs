@@ -75,6 +75,12 @@ describe('kontrole na atrapie API', () => {
     assert.equal(row(drive('recenzent-puste'), /^Kontakt recenzenta/).opis, 'Kontakt recenzenta: puste pola: telefon');
     assert.equal(row(drive('notatki'), /^Notatki dla recenzenta/).status, 'OK'); assert.equal(row(drive('notatki-roznica'), /^Notatki dla recenzenta/).status, 'RÓŻNICA');
   });
+  test('dostępność: 404 dla appAvailabilityV2 (dostępność aplikacji nieustawiona) → BRAK DANYCH z krokiem w App Store Connect, nie BŁĄD; reszta kontroli działa, kod 0', () => {
+    const r = drive('dostepnosc-404'); const w = row(r, /^Dostępność w krajach/);
+    assert.equal(w.status, 'BRAK DANYCH'); match(w.opis, /brak zapisu dostępności/); match(w.opis, /Ceny i dostępność|Pricing and Availability/);
+    assert.equal(r.liczby['BŁĄD'], 0); assert.equal(r.code, 0); nomatch(JSON.stringify(r.wyniki) + r.raport, /SEKRET-SZCZEGOL|111222/);
+    assert.ok(!r.wywolania.some(x => x.includes('/territoryAvailabilities')));
+  });
   test('szczegóły: lista dostępnych krajów zawsze, odpowiedzi wiekowe dopiero z opcją szczegoly', () => {
     const bez = drive('zgodne').raport; const z = drive('szczegoly').raport;
     match(bez, /dostępne \(/); nomatch(bez, /healthOrWellnessTopics = true/); match(z, /healthOrWellnessTopics = true/); match(z, /gambling = false/);

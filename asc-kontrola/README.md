@@ -39,6 +39,8 @@ Klucz trafia tylko do `RUNNER_TEMP` i jest usuwany zawsze.
 | Adresy | Privacy Policy URL (lokalizacje), Support URL, Marketing URL (wersja) | `appInfoLocalizations`, `appStoreVersionLocalizations` |
 | Metadane sklepu | nazwa, podtytuł, słowa kluczowe, tekst promocyjny, opis, lista lokalizacji | jak wyżej |
 | Aplikacja | kategorie, ocena wiekowa (wypisanie), dostępność w krajach | `appInfos`, `ageRatingDeclaration`, `appAvailabilityV2` |
+
+Dostępność w krajach: odpowiedź 404 dla `appAvailabilityV2` (przebieg 21.10.2026) raport pokazuje jako BRAK DANYCH z krokiem w App Store Connect (Ceny i dostępność → Dostępność aplikacji), nie jako BŁĄD — Apple nie opisuje tego kodu, najczęściej oznacza nieustawioną dostępność aplikacji.
 | Aplikacja | etykieta prywatności | **tylko ręcznie** — API jej nie udostępnia (odczyt dokumentacji 21.10.2026) |
 | Informacje dla recenzenta | kontakt (tylko „ustawione/puste”), konto demo, zgodność notatek z plikiem | `appStoreReviewDetail` |
 

@@ -23,6 +23,7 @@ export function opiszWiek({ ocena, deklaracja }, oczekiwane) {
 }
 
 export function porownajDostepnosc({ terytoria, oczekiwane }) {
+  if (terytoria?.nieustawiona) return [wiersz(S.BRAK, 'Dostępność w krajach: brak zapisu dostępności aplikacji (GET appAvailabilityV2 → 404; Apple nie opisuje tego kodu — najczęściej dostępność nieustawiona); sprawdź i zapisz: App Store Connect → aplikacja → Ceny i dostępność (Pricing and Availability) → Dostępność aplikacji, potem uruchom kontrolę ponownie')];
   const dostepne = terytoria.filter(t => t.dostepne).map(t => t.terytorium).sort();
   const lista = [`dostępne (${dostepne.length}): ${dostepne.join(' ')}`];
   if (!terytoria.length) return [wiersz(S.BRAK, 'Dostępność w krajach: brak danych z App Store Connect')];

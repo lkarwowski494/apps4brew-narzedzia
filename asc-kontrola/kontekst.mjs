@@ -105,7 +105,9 @@ export function makeKontekst({ client, config, dzis, czytajJson = () => null, cz
     }),
     dostepnosc: () => raz('dostepnosc', async () => {
       const app = await k.aplikacja();
-      const a = (await client.get(`/v1/apps/${app}/appAvailabilityV2`))?.data;
+      let a;
+      try { a = (await client.get(`/v1/apps/${app}/appAvailabilityV2`))?.data; }
+      catch (e) { if (e.status === 404) return { nieustawiona: true }; throw e; } /* 404: zasób powstaje dopiero po zapisaniu dostępności aplikacji w App Store Connect (przebieg 21.10.2026) */
       if (!a) return [];
       const { data } = await client.list(`/v2/appAvailabilities/${a.id}/territoryAvailabilities?include=territory`);
       return data.map(t => ({ terytorium: t.relationships?.territory?.data?.id, dostepne: t.attributes?.available === true }));
